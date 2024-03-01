@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-import djongo
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -39,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'webscraping',
     'djongo',  
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
 
 ]
 
@@ -90,8 +91,7 @@ DATABASES = {
 
 ELASTICSEARCH_DSL={
     'default': {
-        'hosts': 'localhost:9200',
-        'http_auth': ('username', 'password')
+        'hosts': 'http://localhost:9200',
     }
 }
 

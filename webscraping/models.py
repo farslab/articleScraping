@@ -1,5 +1,5 @@
 # web_scraping/models.py
-from djongo import models
+from django.db import models
 
 
 class Publication(models.Model):
