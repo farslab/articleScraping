@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scraped Data</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="container justify-content-center align-items-center">
+    <div class="w-100 row d-flex justify-content-center p-4">  <a
+        class="btn btn-success"
+        style="margin: auto"
+        href="{% url 'home' %}"
+      >
+        Go Back Search </a
+      ></div>
+   
+    <div class="container row d-flex justify-content-center align-items-center">
+      <div class="card col-8 ml-4 mt-2">
+        <div class="card-header row d-flex justify-content-between align-items-center"> 
+            <a href="{{publication.website_url}}" target="_blank" download="{{publication.title}}.pdf" class="btn btn-warning {% if not publication.url %} disabled {%endif%}">Read</a>
+            
+            
+            <a href="{{publication.url}}" target="_blank" download="{{publication.title}}.pdf" class="btn btn-danger {% if not publication.url %} disabled {%endif%}">Download</a>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{publication.title}}</h5>
+          <span class="badge badge-primary text-center align-items-center">{{publication.publication_type}}</span>
+
+          <p>{{publication.authors}}</p>
+          {% if publication.doi_number%}
+          <a href="https://doi.org/{{publication.doi_number}}">doi.org/{{publication.doi_number}}</a><br><br>
+          {% endif %}
+
+            <strong>Keywords:</strong> {{publication.keywords_article}} <br>
+            <strong>Search Keywords:</strong> {{publication.keywords_searched}} <br>
+            <strong>Abstract:</strong> {{publication.abstract}}<br>
+            <strong>References:</strong><br> {{publication.references}} <br>
+            
+        </div>
+        <div class="card-footer text-muted">{{publication.publication_date}}</div>
+      </div>
+    </div>
+  </body>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</html>

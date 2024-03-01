@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Search Results</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    />
+  </head>
+  <body class="container justify-content-center">
+    <div class="container row d-flex justify-content-center align-items-center">
+      <div class="container p-5 row d-flex justify-content-between align-items-center ">
+        <p>
+          {% if searchKeywordChanged %}
+              Search Keyword Recommend: {{ searchKeywordChanged }}
+          {% else %}
+              Search Keyword: {{ searchKeyword }}
+          {% endif %}
+      </p>
+        <a href="/" class="btn btn-success"> New Search </a>
+       </div>
+      {% for result in searchObjects %}
+
+      <div class="card text-center col-5 ml-4 mt-2">
+        <div class="card-body">
+          <h5 class="card-title">{{result.title|truncatewords:7}}</h5>
+          <p class="card-text">
+            <p>{{result.authors}}</p>
+            {{result.abstract|truncatewords:20}}
+          </p>
+          <div class="row d-flex justify-content-center">
+            <a href="{{result.website_url}}" target="_blank" download="{{result.title}}.pdf" class="mx-2 btn btn-warning ">Read More</a>
+            <a href="{{result.url}}" target="_blank" download="{{result.title}}.pdf" class="mx-2 btn btn-danger {% if not result.url %} disabled {%endif%}">Download</a>
+
+          </div>
+        </div>
+        <div class="card-footer text-muted">{{result.publication_date}}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <br /><br />
+
+
+    
+
+    <div
+      class="w3-container"
+      style="margin: auto; width: 50%; text-align: center"
+    >
+      <a
+        class="btn btn-primary"
+        style="margin: auto"
+        href="{% url 'home' %}"
+      >
+        Go to Search </a
+      >
+    </div>
+    <br /><br />
+  </body>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</html>
