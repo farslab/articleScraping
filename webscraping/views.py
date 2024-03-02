@@ -8,22 +8,82 @@ from urllib.parse import quote
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.text import slugify
+from elasticsearch_dsl import Q
 from .models import Publication
 import requests
 from bs4 import BeautifulSoup
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.shortcuts import render, get_object_or_404
-import os
+from django.views.generic import ListView,TemplateView
+from .models import Publication
+from .documents import PublicationDocument
+from django.core.paginator import Paginator
 
+class PublicationListView(ListView):
+    model = Publication
+    template_name = 'home.html'
+    context_object_name = 'publications'
+    
+    def get_queryset(self):
+        author_filter = self.request.GET.get('author', None)
+        title_filter = self.request.GET.get('title', None)
+        date_filter = self.request.GET.get('date', None)
+
+        q_filters = []
+        if author_filter:
+            q_filters.append(Q("match", authors=author_filter))
+        if title_filter:
+            q_filters.append(Q("match", title=f'*{title_filter}*'))
+        if date_filter:
+            date_start, date_end = date_filter.split(" to ")
+            date_start = datetime.strptime(date_start, "%Y-%m-%d").date()
+            date_end = datetime.strptime(date_end, "%Y-%m-%d").date()
+            q_filters.append(Q("range", date={"gte": date_start, "lte": date_end}))
+            
+        search = PublicationDocument.search().query('bool', filter=q_filters)
+        count=search.count()
+        print(f'{count} Sonuç Bulundu')
+        response = search[0:count].execute()
+        publication_ids = [hit.meta.id for hit in response]
+
+        queryset = Publication.objects.filter(id__in=publication_ids)
+        return queryset
+        
+def check_search_query(search_query):
+        search_query = slugify(search_query)
+        url = f"https://scholar.google.com/scholar?hl=tr&q={search_query}" 
+        # URL-encode username and password
+        proxy_url = f'http://bordo:Bordo66156615@unblock.oxylabs.io:60000'
+        proxies = {
+            'http': proxy_url,
+            'https': proxy_url
+        }
+        r = requests.get(url, proxies=proxies, verify=False)
+        soup = BeautifulSoup(r.content, 'lxml')
+      
+        h2_a_tag = soup.select_one('#gs_res_ccl_top h2.gs_rt a')
+        if h2_a_tag and h2_a_tag.text:
+            h2_a_text = h2_a_tag.text
+            search_query_changed = h2_a_text
+            changed=True
+        else:
+            search_query_changed=search_query
+            changed=False
+        
+        return search_query_changed,changed
 
 def scrape(request):
     
     selected_source = request.POST.get('source', '')
     if request.method == 'POST' and selected_source=="dergipark" :
-        search_query = request.POST.get('url', '')
         
-        search_query = slugify(search_query)
+        #search query control from googlescholar
+        search_query_form = request.POST.get('url', '')
+        search_query,is_changed=check_search_query(search_query_form)
+        print(is_changed)
+        print(search_query)
+        # search_query = slugify(search_query)
         url = f"https://dergipark.org.tr/en/search?q={search_query}&section=articles" 
 
         # URL-encode username and password
@@ -66,7 +126,7 @@ def scrape(request):
                 keywords_article="None"
                 
             doi = article_soup.find('a', class_='doi-link').get('href').split('doi.org/')[-1] if article_soup.find('a', class_='doi-link') else None
-            pdf_url= article_soup.find('a', title='Article PDF link').get('href') if  article_soup.find('a', title='Article PDF link').get('href') else None
+            pdf_url= article_soup.find('a', title='Article PDF link').get('href') if  article_soup.find('a', title='Article PDF link') else None
 
             date_element = article_soup.find('span', class_='article-subtitle')
             publication_date = None
@@ -105,8 +165,9 @@ def scrape(request):
         context={
             'searchObjects':publications,
             'searchKeyword': request.POST.get('url', ''),
-
         }
+        if is_changed:
+             context.update({'searchKeywordChanged': search_query})
         return render(request, 'results.html', context)
        
     if request.method == 'POST' and selected_source=="google_scholar":
@@ -252,12 +313,7 @@ def publicationDetails(request,id):
     
     return render(request, 'publication_details.html',context)    
     
-def home(request):
-    context={
-        'previousResults':Publication.objects.all().order_by('title')
-    }
-    
-    return render(request, 'home.html',context)
+
 
 def download_file(request):
     if 'scraped_data' in request.session:

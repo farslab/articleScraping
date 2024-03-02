@@ -12,7 +12,7 @@ def searchPage(request):
 
 urlpatterns = [
     
-    path('', views.home, name='home'),
+    path('', views.PublicationListView.as_view(), name='publication_list'),
     path('scrape/', views.scrape, name='scrape'),
     path('download/', views.download_file, name='download_file'),
     path('publication_details/<int:id>/',views.publicationDetails, name='publication_details'),
