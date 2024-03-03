@@ -14,7 +14,7 @@
   </head>
   <body class="container bg-light ">
     <div class="container flex-column d-flex col-8 align-items-center pt-4">
-      <h1>Article Search</h1>
+      <h1>Search</h1>
 
       <form class="form mt-3 flex-column d-flex justify-content-center"  method="post" action="{% url 'scrape' %}">
         {% csrf_token %}
@@ -29,18 +29,7 @@
         </div>
 
         <div class="form-group mx-2 d-flex justify-content-center">
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="source"
-              id="googleScholar"
-              value="google_scholar"
-            />
-            <label class="form-check-label" for="googleScholar"
-              >Google Scholar</label
-            >
-          </div>
+         
           <div class="form-check form-check-inline">
             <input
               class="form-check-input"
@@ -62,25 +51,40 @@
     <br />
 
     <div class="container mt-5">
-      <h1 class="text-center">Articles DB</h1>
-      <p>{% if publications.count %}{{publications.count}} Results Found.{% else %} There is no Article in DB.{%endif%}</p>
+      <h1 class="text-center">Article Database</h1>
+      {% if not publications.count %}<p>There is no Article in DB.</p>{% else %} <p> {{publications.count}} Results Found.</p>
       <div class="container row d-flex flex-row justify-content-between">
-
-        <form class="form-inline" method="get" action="{% url 'publication_list' %}">
-          <div class="mb-3">
+        <div class="row d-flex align-items-end mb-3">
+        <form class="form-inline d-flex align-items-end" method="get" action="{% url 'publication_list' %}">
+          <div class="ml-2">
+            <label for="title" class="form-label">Title:</label>
+            <input type="text" name="title" id="title" class="form-control" value="{{ request.GET.title }}">
+        </div>
+          <div class="ml-2 ">
               <label for="author" class="form-label">Author:</label>
               <input type="text" name="author" id="author" class="form-control" value="{{ request.GET.author }}">
           </div>
       
-          <div class="mb-3">
-              <label for="title" class="form-label">Title:</label>
-              <input type="text" name="title" id="title" class="form-control" value="{{ request.GET.title }}">
-          </div>
+          
+          <div class="ml-2">
+            <label for="sort_by" class="form-label">Sort by:</label>
+            <select name="sort_by" id="sort_by" class="form-control">
+                <option value="title" {% if request.GET.sort_by == 'title' %}selected{% endif %}>Title</option>
+                <option value="-title" {% if request.GET.sort_by == '-title' %}selected{% endif %}>Title DESC</option>
+
+                <option value="publication_date" {% if request.GET.sort_by == 'publication_date' %}selected{% endif %}>Date</option>
+                <option value="-publication_date" {% if request.GET.sort_by == '-publication_date' %}selected{% endif %}>Date DESC</option>
+
+                <option value="citation_count" {% if request.GET.sort_by == 'citation_count' %}selected{% endif %}>Citation Counts</option>
+                <option value="-citation_count" {% if request.GET.sort_by == '-citation_count' %}selected{% endif %}>Citation Counts DESC</option>
+
+            </select>
+        </div>
       
-          <button type="submit" class="btn btn-primary">Filter</button>
+          <button type="submit" class="btn btn-primary ml-3">Filter</button>
       </form>
       
-      <form class="form-inline" method="get" action="{% url 'publication_list' %}">
+      <form class="form-inline ml-2" method="get" action="{% url 'publication_list' %}">
         <div class="mb-3">
             <input type="hidden" name="author" id="author" class="form-control" value="">
         </div>
@@ -88,15 +92,21 @@
         <div class="mb-3">
             <input type="hidden" name="title" id="title" class="form-control" value="">
         </div>
+        
         <button type="submit" class="btn btn-warning">Reset Filter</button>
-  
     </form>
+
+  </div>
+    
+
       </div>
       <table class="table table-hover">
         <thead class="thead-dark">
           <tr>
             <th scope="col">Title</th>
             <th scope="col">Author(s)</th>
+            <th scope="col">Citation</th>
+            <th scope="col">Date</th>
 
             <th scope="col">Download</th>
           </tr>
@@ -112,6 +122,10 @@
               >
             </td>
             <td>{{ publication.authors }}</td>
+            <td>{{ publication.citation_count }}</td>
+            <td>{{ publication.publication_date }}</td>
+
+
 
             <td>
               <a
@@ -125,6 +139,7 @@
           {% endfor %}
         </tbody>
       </table>
+      {%endif%}
     </div>
    
   </body>

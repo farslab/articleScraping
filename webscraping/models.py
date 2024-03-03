@@ -12,7 +12,7 @@ class Publication(models.Model):
     keywords_article = models.TextField(null=True,default="None",blank=True)
     abstract = models.TextField(null=True,blank=True)
     references = models.TextField(null=True,default="None",blank=True)
-    citation_count = models.CharField(max_length=100,null=True,blank=True)
+    citation_count = models.IntegerField(null=True,blank=True)
     doi_number = models.CharField(max_length=50, null=True, blank=True)
     url = models.URLField(null=True, blank=True)
     website_url = models.URLField(null=True, blank=True)
