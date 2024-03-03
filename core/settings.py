@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'webscraping',
     'djongo',  
     'django_elasticsearch_dsl',
+    'django_filters',
 
 ]
 

@@ -1,6 +1,7 @@
 # web_scraping/views.py
 from datetime import datetime
 import random
+from django import forms
 from elasticsearch_dsl import Q
 from .models import Publication
 import requests
@@ -9,6 +10,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from .models import Publication
 from .documents import PublicationDocument
+
+
 
 class PublicationListView(ListView):
     model = Publication
@@ -23,15 +26,10 @@ class PublicationListView(ListView):
 
         q_filters = []
         if author_filter:
-            q_filters.append(Q("match", authors=author_filter))
+            q_filters.append(Q("wildcard", authors=f'*{author_filter}*'))
         if title_filter:
-            q_filters.append(Q("match", title=f'*{title_filter}*'))
-        if date_filter:
-            date_start, date_end = date_filter.split(" to ")
-            date_start = datetime.strptime(date_start, "%Y-%m-%d").date()
-            date_end = datetime.strptime(date_end, "%Y-%m-%d").date()
-            q_filters.append(Q("range", date={"gte": date_start, "lte": date_end}))
-            
+            q_filters.append(Q("wildcard", title=f'*{title_filter}*'))
+        
         search = PublicationDocument.search().query('bool', filter=q_filters)
         count=search.count()
         print(f'{count} Sonuç Bulundu')
@@ -40,6 +38,7 @@ class PublicationListView(ListView):
 
         queryset = Publication.objects.filter(id__in=publication_ids).order_by(sort_by)
         return queryset
+   
         
 def check_search_query(search_query):
         url = f"https://scholar.google.com/scholar?hl=tr&q={search_query}" 

@@ -52,7 +52,11 @@
 
     <div class="container mt-5">
       <h1 class="text-center">Article Database</h1>
-      {% if not publications.count %}<p>There is no Article in DB.</p>{% else %} <p> {{publications.count}} Results Found.</p>
+      
+      
+     
+      {% if not publications.count %}<p>There is no Article in DB.</p>{% else %} <p> {{publications.count}} Results Found.</p>{%endif%}
+
       <div class="container row d-flex flex-row justify-content-between">
         <div class="row d-flex align-items-end mb-3">
         <form class="form-inline d-flex align-items-end" method="get" action="{% url 'publication_list' %}">
@@ -85,13 +89,7 @@
       </form>
       
       <form class="form-inline ml-2" method="get" action="{% url 'publication_list' %}">
-        <div class="mb-3">
-            <input type="hidden" name="author" id="author" class="form-control" value="">
-        </div>
-  
-        <div class="mb-3">
-            <input type="hidden" name="title" id="title" class="form-control" value="">
-        </div>
+        
         
         <button type="submit" class="btn btn-warning">Reset Filter</button>
     </form>
@@ -117,7 +115,7 @@
             <td>
               <a
                 href="{% url 'publication_details' id=publication.id %}"
-                class="text-decoration-none"
+                class="text-dark"
                 >{{ publication.title|truncatewords:10 }}</a
               >
             </td>
@@ -139,7 +137,6 @@
           {% endfor %}
         </tbody>
       </table>
-      {%endif%}
     </div>
    
   </body>
