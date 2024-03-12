@@ -10,8 +10,9 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from .models import Publication
 from .documents import PublicationDocument
+from zenrows import ZenRowsClient
 
-
+client = ZenRowsClient("521534c7909886e63c214ef5a12b6868bdd1d291")
 
 class PublicationListView(ListView):
     model = Publication
@@ -21,7 +22,6 @@ class PublicationListView(ListView):
     def get_queryset(self):
         author_filter = self.request.GET.get('author', None)
         title_filter = self.request.GET.get('title', None)
-        date_filter = self.request.GET.get('date', None)
         sort_by = self.request.GET.get('sort_by', 'title') 
 
         q_filters = []
@@ -48,7 +48,7 @@ def check_search_query(search_query):
             'http': proxy_url,
             'https': proxy_url
         }
-        r = requests.get(url, proxies=proxies, verify=False)
+        r = client.get(url)
         soup = BeautifulSoup(r.content, 'lxml')
       
         h2_a_tag = soup.select_one('#gs_res_ccl_top h2.gs_rt a')
@@ -59,7 +59,8 @@ def check_search_query(search_query):
         else:
             search_query_changed=search_query
             changed=False
-        
+        print(search_query_changed)
+        print(changed)
         return search_query_changed,changed
 
 def scrape(request):
@@ -70,13 +71,13 @@ def scrape(request):
         url = f"https://dergipark.org.tr/en/search?q={search_query}&section=articles" 
 
         # URL-encode username and password
-        proxy_url = f'http://bordo:Bordo66156615@unblock.oxylabs.io:60000'
-        proxies = {
-            'http': proxy_url,
-            'https': proxy_url
-        }
+        # proxy_url = f'http://bordo:Bordo66156615@unblock.oxylabs.io:60000'
+        # proxies = {
+        #     'http': proxy_url,
+        #     'https': proxy_url
+        # }
 
-        r = requests.get(url, proxies=proxies, verify=False,timeout=45)
+        r = client.get(url, verify=False,timeout=45)
         soup = BeautifulSoup(r.content, 'lxml')
         # get the required data from soup object
         title = soup.title.string
@@ -87,7 +88,7 @@ def scrape(request):
 
         publications=[]
         for article_link in result_list:
-            response = requests.get(article_link)
+            response = client.get(article_link)
             article_html = response.content
             
             # Parse the HTML content with BeautifulSoup

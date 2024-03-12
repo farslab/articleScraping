@@ -3,8 +3,6 @@ from django_elasticsearch_dsl.registries import registry
 from .models import Publication
 from elasticsearch_dsl import connections
 
-# Elasticsearch bağlantısını oluşturun
-# connections.create_connection(alias='default', hosts=['http://localhost:9200'], timeout=20)
 
 @registry.register_document
 class PublicationDocument(Document):
