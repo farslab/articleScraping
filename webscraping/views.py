@@ -22,6 +22,8 @@ class PublicationListView(ListView):
     def get_queryset(self):
         author_filter = self.request.GET.get('author', None)
         title_filter = self.request.GET.get('title', None)
+        doi_filter = self.request.GET.get('doi_number', None)
+
         sort_by = self.request.GET.get('sort_by', 'title') 
 
         q_filters = []
@@ -29,6 +31,8 @@ class PublicationListView(ListView):
             q_filters.append(Q("wildcard", authors=f'*{author_filter}*'))
         if title_filter:
             q_filters.append(Q("wildcard", title=f'*{title_filter}*'))
+        if doi_filter:
+            q_filters.append(Q("wildcard", doi_number=f'*{doi_filter}*'))
         
         search = PublicationDocument.search().query('bool', filter=q_filters)
         count=search.count()
@@ -42,12 +46,7 @@ class PublicationListView(ListView):
         
 def check_search_query(search_query):
         url = f"https://scholar.google.com/scholar?hl=tr&q={search_query}" 
-        # URL-encode username and password
-        proxy_url = f'http://bordo:Bordo66156615@unblock.oxylabs.io:60000'
-        proxies = {
-            'http': proxy_url,
-            'https': proxy_url
-        }
+        #zenrows client        
         r = client.get(url)
         soup = BeautifulSoup(r.content, 'lxml')
       
