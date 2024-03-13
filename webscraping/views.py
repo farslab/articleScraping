@@ -23,7 +23,6 @@ class PublicationListView(ListView):
         author_filter = self.request.GET.get('author', None)
         title_filter = self.request.GET.get('title', None)
         doi_filter = self.request.GET.get('doi_number', None)
-
         sort_by = self.request.GET.get('sort_by', 'title') 
 
         q_filters = []
@@ -32,7 +31,7 @@ class PublicationListView(ListView):
         if title_filter:
             q_filters.append(Q("wildcard", title=f'*{title_filter}*'))
         if doi_filter:
-            q_filters.append(Q("wildcard", doi_number=f'*{doi_filter}*'))
+            q_filters.append(Q("term", doi_number=doi_filter))
         
         search = PublicationDocument.search().query('bool', filter=q_filters)
         count=search.count()
@@ -68,13 +67,6 @@ def scrape(request):
         search_query_form = request.POST.get('url', '')
         search_query,is_changed=check_search_query(search_query_form)
         url = f"https://dergipark.org.tr/en/search?q={search_query}&section=articles" 
-
-        # URL-encode username and password
-        # proxy_url = f'http://bordo:Bordo66156615@unblock.oxylabs.io:60000'
-        # proxies = {
-        #     'http': proxy_url,
-        #     'https': proxy_url
-        # }
 
         r = client.get(url, verify=False,timeout=45)
         soup = BeautifulSoup(r.content, 'lxml')
